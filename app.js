@@ -5,13 +5,14 @@ const bodyParser = require('body-parser')
 const userModel = require("./models/user");
 const invoiceModel = require("./models/invoice");
 require("dotenv").config();
+const { connectionToMongodb } = require("./db/connect");
 
 
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-app.set("view engine", "ejs");
-app.set("views", "views");
+
+connectionToMongodb();
 
 
 app.use(express.urlencoded({ extended: false }));
