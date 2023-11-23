@@ -3,6 +3,9 @@ const jwt = require("jsonwebtoken");
 
 
 const createUser = async (req, res) => {
+  if (!req.body || !req.body.fullName || !req.body.email || !req.body.password || !req.body.country) {
+    return res.status(400).json({ error: "Incomplete request body or missing fields" });
+  }
     const { fullName, email, password, country } = req.body;
     try {
       const existingUser = await userModel.findOne({

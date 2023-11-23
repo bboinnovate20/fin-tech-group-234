@@ -3,21 +3,18 @@ const joi = require("joi")
 const validateCreateUser = async (req, res, next) => {
     try {
         const schema = joi.object({
-            first_name: joi.string().trim().required().messages({
-                'string.empty': `"First name" cannot be empty`,
-                'any.required': `"First name" is required`,
+            fullName: joi.string().trim().required().messages({
+                'string.empty': `"fullName" cannot be empty`,
+                'any.required': `"fullName" is required`,
             }),
-            last_name: joi.string().trim().required().messages({
-                'string.empty': `"Last name" cannot be empty`,
-                'any.required': `"Last name" is required`,
-            }),
+           
             email: joi.string().trim().email({
                 minDomainSegments: 2,
                 tlds: { allow: ['com', 'net'] }, 
             }).required().messages({
-                'string.email': `"Email" must be a valid email address`,
-                'string.empty': `"Email" cannot be empty`,
-                'any.required': `"Email" is required`,
+                'string.email': `"email" must be a valid email address`,
+                'string.empty': `"email" cannot be empty`,
+                'any.required': `"email" is required`,
             }),
             password: joi.string().min(8).required().messages({
                 'string.min': `"Password" should be at least 8 characters long`,
