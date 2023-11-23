@@ -3,11 +3,15 @@ const joi = require("joi")
 const validateCreateUser = async (req, res, next) => {
     try {
         const schema = joi.object({
-            first_name: joi.string().trim().required().messages({
+            firstName: joi.string().trim().required().messages({
                 'string.empty': `"First name" cannot be empty`,
                 'any.required': `"First name" is required`,
             }),
-            last_name: joi.string().trim().required().messages({
+            lastName: joi.string().trim().required().messages({
+                'string.empty': `"Last name" cannot be empty`,
+                'any.required': `"Last name" is required`,
+            }),
+            businessName: joi.string().trim().required().messages({
                 'string.empty': `"Last name" cannot be empty`,
                 'any.required': `"Last name" is required`,
             }),
@@ -19,15 +23,15 @@ const validateCreateUser = async (req, res, next) => {
                 'string.empty': `"Email" cannot be empty`,
                 'any.required': `"Email" is required`,
             }),
+            phoneNumber: joi.string().trim().required().messages({
+                'string.empty': `"Country" cannot be empty`,
+                'any.required': `"Country" is required`,
+            }),
             password: joi.string().min(8).required().messages({
                 'string.min': `"Password" should be at least 8 characters long`,
                 'string.empty': `"Password" cannot be empty`,
                 'any.required': `"Password" is required`,
             }),
-            country: joi.string().trim().required().messages({
-                'string.empty': `"Country" cannot be empty`,
-                'any.required': `"Country" is required`,
-            })
         });
 
         await schema.validateAsync(req.body, { abortEarly: false });
