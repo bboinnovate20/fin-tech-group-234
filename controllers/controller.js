@@ -1,4 +1,5 @@
 const userModel = require("../models/user");
+const customerModel = require("../models/customer")
 const jwt = require("jsonwebtoken");
 
 
@@ -24,7 +25,8 @@ const createUser = async (req, res, next) => {
         businessName: businessName,
         email: email,
         phoneNumber: phoneNumber,
-        password: password
+        password: password,
+        role: 'businessOwner'
       });
 
       const JWT_SECRET = process.env.JWT_SECRET;
@@ -73,9 +75,7 @@ const login = async (req, res, next) => {
         }) )
       }
   
-      const token = await jwt.sign({ user: user }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
+      const token = await jwt.sign({ user: user }, process.env.JWT_SECRET);
   
       res.cookie("token", token, { httpOnly: true }, { maxAge: 60 * 60 * 1000 });
       res.status(200).json({
@@ -88,6 +88,48 @@ const login = async (req, res, next) => {
       res.status(500).send("Internal Server Error");
     }
 };
+
+const createCustomer = async (req, res, next) => {
+  let { firstName, lastName, businessName, email, phoneNumber, address } = req.body;
+
+  email = email.toLowerCase();
+  try {
+    const existingUser = await customerModel.findOne({
+      email: email,
+    });
+
+    if (existingUser) {
+      return next(
+      res.status(401).json({
+        status: 'error',
+        message: 'Customer Already Exist'
+    }))
+    }
+
+    const user = await customerModel.create({
+      firstName: firstName,
+      lastName: lastName,
+      businessName: businessName,
+      email: email,
+      phoneNumber: phoneNumber,
+      address: address,
+      ownerId: req.user.userId
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Customer Created Successful',
+      customer: user
+  })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+};
+
+const getCustomer = async (req,res,next) => {
+  
+}
   
 const invoiceData = async (req, res) => {
     
@@ -96,5 +138,6 @@ const invoiceData = async (req, res) => {
   module.exports = {
     createUser,
       login,
+      createCustomer,
       invoiceData
   };

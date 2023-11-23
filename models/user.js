@@ -22,6 +22,7 @@ const userSchema = new schema({
   password: { type: String, required: true },
   image: { type: String },
   balance: { type: String},
+  key: {type: String}
 });
 
 //before save
