@@ -16,6 +16,7 @@ userRouter.post("/signup", middlewear.validateCreateUser, controller.createUser)
 userRouter.post("/login",  controller.login)
 
 userRouter.post("/customer", auth,  controller.createCustomer)
+userRouter.get("/customer", auth,  controller.getCustomer)
 
 
 

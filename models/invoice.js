@@ -10,15 +10,12 @@ const invoiceSchema = new schema({
         type: String,
      default: shortid.generate
     },
-    fullName: { type: String, required: false },
-    email: { type: String, required: true },
+    productName: { type: String, required: false },
+    quantity: { type: String, required: true },
     amount: { type: String, required: true },
-    shortDescription: { type: String, required: true },
+    description: { type: String, required: true },
     createdAt: { type: Date, required: true, default:Date.now },
-    user_id:{type:mongoose.Schema.Types.String,
-        ref:"users"
-        },
-  
+    ownerId: { type: String, required: true },
 
 })
 
