@@ -1,6 +1,7 @@
 const express = require("express");
 const controller = require("../controllers/controller")
 const middlewear = require("../middlewear/middlewear")
+const cookieParser = require("cookie-parser");
 
 const userModel = require("../models/user");
 
