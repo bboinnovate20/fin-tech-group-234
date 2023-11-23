@@ -2,9 +2,8 @@ const userModel = require("../models/user");
 const jwt = require("jsonwebtoken");
 
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
     let { firstName, lastName, businessName, email, phoneNumber, password} = req.body;
-    console.log(req.body)
     email = email.toLowerCase();
     try {
       const existingUser = await userModel.findOne({
@@ -12,10 +11,11 @@ const createUser = async (req, res) => {
       });
   
       if (existingUser) {
+        return next(
         res.status(401).json({
           status: 'error',
           message: 'User Already Exist'
-      })
+      }))
       }
   
       const user = await userModel.create({
@@ -41,11 +41,11 @@ const createUser = async (req, res) => {
     })
     } catch (error) {
       console.log(error);
-      res.status(500).message("Internal Server Error");
+      res.status(500).json({message: "Internal Server Error"});
     }
 };
   
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     let { email, password } = req.body;
     email = email.toLowerCase();
   
@@ -53,23 +53,24 @@ const login = async (req, res) => {
       const user = await userModel.findOne({
         email: email,
       });
-      // console.log(user)
   
       if (!user) {
+        return next(
           res.status(401).json({
             status: 'error',
             message: 'Please Provide a Valid Email'
-          }) 
+          }) )
       }
   
       const validPassword = await user.isValidPassword(password);
       // console.log(email);
   
       if (!validPassword) {
+        return next(
         res.status(401).json({
           status: 'error',
           message: 'Please Provide a Valid Password'
-        }) 
+        }) )
       }
   
       const token = await jwt.sign({ user: user }, process.env.JWT_SECRET, {
