@@ -249,27 +249,13 @@ const verifyInvoice = async (req, res, next) => {
           })
         );
       }
-      const invoiceReference = invoice.reference;
-      const invoiceId = invoice._id;
-      const userId = invoice.ownerId;
-      const amount = invoice.amount
-     //verificationData = await middlewear.verifyPayment(invoiceReference);
-     console.log(verificationData)
-     console.log(invoiceId)
-     if (verificationData.status == "success") {
-      await invoiceModel.findOneAndUpdate(
-            { _id: invoiceId },
-            { status: "paid", paid: true },
-            { upsert: true, omitUndefined: true }
-          );
-        if (invoice.status == 'overDue') {
-          await userModel.findOneAndUpdate(
-          { _id: userId },
-          { balance: Amount },
-          { upsert: true, omitUndefined: true }
-        );
-      }
-        }
+
+      res.status(200).json({
+        status: "success",
+        invoice: invoice,
+      });
+      return next()
+
     }
 
     let User = await userModel.findOne({
