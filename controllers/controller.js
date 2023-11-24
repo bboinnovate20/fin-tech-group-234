@@ -1,7 +1,9 @@
 const userModel = require("../models/user");
 const customerModel = require("../models/customer");
-const invoiceModel = require('../models/invoice')
+const invoiceModel = require('../models/invoice');
+const middlewear = require('../middlewear/middlewear')
 const jwt = require("jsonwebtoken");
+const shortid = require("shortid");
 
 const createUser = async (req, res, next) => {
   let { firstName, lastName, businessName, email, phoneNumber, password } =
@@ -149,7 +151,7 @@ const getCustomer = async (req, res, next) => {
         res.status(401).json({
           status: "error",
           message:
-            "We are currently unable to get this user details. Please try again.",
+            "We are currently unable to get this customer details. Please try again.",
         })
       );
     }
@@ -168,21 +170,157 @@ const getCustomer = async (req, res, next) => {
   });
 };
 
-const invoiceData = async (req, res, next) => {
+const createInvoice = async (req, res, next) => {
   let { productName, amount, quantity, description } = req.body;
   try {
-    
+    if (req.query._id) {
+      let customer = await customerModel.findOne({
+        _id: req.query,
+        ownerId: req.user.userId,
+      });
+      if (!customer) {
+        return next(
+          res.status(401).json({
+            status: "error",
+            message:
+              "We are currently unable to get this customer details. Please try again.",
+          })
+        );
+      }
+      const customerName = customer.firstName;
+      const customerEmail = customer.email;
+      const customerAddress = customer.address;
+      const customerPhoneNumber = customer.address;
+      const customerId = shortid.generate;
+
+    middlewear.initiatePayment(amount, customerEmail, customerId).then(async(paymentData) => {
+      let url = await paymentData.authorization_url;
+      let reference = await paymentData.reference;
+      // Redirect the user to paymentData.authorization_url to complete the payment
+      ////////////////////////////////////////////////////////////////////////////
+      const invoiceDetails = {
+        productName: productName,
+        amount: amount,
+        quantity: quantity,
+        description: description,
+        customerName: customerName,
+        customerEmail:  customerEmail,
+        customerAddress:  customerAddress,
+        customerPhoneNumber:  customerPhoneNumber,
+        ownerId: req.user.userId,
+        url:url,
+        reference: reference
+      }
+      const invoice = await invoiceModel.create(invoiceDetails)
+      
+    res.status(201).json({
+      status: "success",
+      message: "Customer Invoice Successfully Created",
+      invoice: invoice,
+    });
+      ///////////////////////////////////////////////////////////////////////////////
+    })
+    .catch((error) => {
+      console.log(error)
+    });
+  }
   } catch(error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
-
 };
+
+const verifyInvoice = async (req, res, next) => {
+  try{
+    const query = {
+      ownerId: req.user.userId,
+    };
+    if (req.query._id) { 
+      let invoice = await invoiceModel.findOne({
+        _id: req.query._id,
+        ownerId: req.user.userId,
+      });
+      if (!invoice) {
+        return next(
+          res.status(401).json({
+            status: "error",
+            message:
+              "We are currently unable to get this invoice details. Please try again.",
+          })
+        );
+      }
+      const invoiceReference = invoice.reference;
+      const invoiceId = invoice._id;
+      const userId = invoice.ownerId;
+      const amount = invoice.amount
+     //verificationData = await middlewear.verifyPayment(invoiceReference);
+     console.log(verificationData)
+     console.log(invoiceId)
+     if (verificationData.status == "success") {
+      await invoiceModel.findOneAndUpdate(
+            { _id: invoiceId },
+            { status: "paid", paid: true },
+            { upsert: true, omitUndefined: true }
+          );
+        if (invoice.status == 'overDue') {
+          await userModel.findOneAndUpdate(
+          { _id: userId },
+          { balance: Amount },
+          { upsert: true, omitUndefined: true }
+        );
+      }
+        }
+    }
+
+    let User = await userModel.findOne({
+      _id: req.user.userId
+    });
+    let verificationData;
+    let invoices = await invoiceModel.find(query);
+    const filteredResponses = invoices.map(({_id,reference,status,ownerId,amount})=> ({
+      _id,
+      reference,
+      status,
+      ownerId,
+      amount
+    }))
+    for (let response of filteredResponses) {
+
+     verificationData = await middlewear.verifyPayment(response.reference)
+     Amount = response.amount + User.balance;
+     if (verificationData.status == "success") {
+        await invoiceModel.findOneAndUpdate(
+            { _id: response._id },
+            { status: "paid", paid: true },
+            { upsert: true, omitUndefined: true }
+        );
+        if (response.status == 'overDue') {
+          await userModel.findOneAndUpdate(
+            { _id: response.ownerId },
+            { balance: Amount },
+            { upsert: true, omitUndefined: true }
+          );
+        }
+      }
+     //////////////////////////////////////////////////////////////////
+    }
+
+    res.status(200).json({
+      status: "success",
+      invoices: invoices,
+    });
+
+  } catch(error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
 
 module.exports = {
   createUser,
   login,
   createCustomer,
   getCustomer,
-  invoiceData,
+  createInvoice,
+  verifyInvoice
 };

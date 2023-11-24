@@ -18,6 +18,7 @@ userRouter.post("/login",  controller.login)
 userRouter.post("/customer", auth,  controller.createCustomer)
 userRouter.get("/customer", auth,  controller.getCustomer)
 
-
+userRouter.post("/invoice", auth, controller.createInvoice)
+userRouter.get("/invoice", auth, controller.verifyInvoice)
 
 module.exports = userRouter
