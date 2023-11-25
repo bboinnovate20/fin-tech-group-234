@@ -21,7 +21,7 @@ const userSchema = new schema({
   phoneNumber: { type: String, required: true },
   password: { type: String, required: true },
   image: { type: String },
-  balance: { type: String},
+  balance: { type: Number, default: 0, index: true},
   key: {type: String}
 });
 

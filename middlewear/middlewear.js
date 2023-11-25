@@ -1,6 +1,8 @@
 const joi = require("joi");
-const { promisify } = require('util');
+const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
+const axios = require("axios");
+
 
 const validateCreateUser = async (req, res, next) => {
     try {
@@ -98,8 +100,67 @@ const auth = async (req, res, next) => {
   }
 };
 
+const initiatePayment = async (amount, email, reference) => {
+  try {
+    const response = await axios.post(
+      "https://api.paystack.co/transaction/initialize",
+      {
+        amount: amount * 100, // Amount in kobo (1 Naira = 100 kobo)
+        email,
+        reference,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Error initiating payment:", error.response.data);
+    throw error.response.data;
+  }
+};
+
+const verifyPayment = async (reference) => {
+  try {
+    const response = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    let responseData = response.data.data;
+    const verificationData = {
+      date: responseData.paid_at,
+      status: responseData.status,
+      response: responseData.gateway_response,
+      channel: responseData.channel,
+      currency: responseData.currency,
+      cardType: responseData.authorization.card_type,
+      bank: responseData.authorization.bank,
+      accountName: responseData.authorization.account_name,
+      amount: responseData.amount / 100,
+    };
+    return verificationData
+
+    }
+   catch (error) {
+    console.error("Error verifying payment:", error.response.data);
+    throw error.response.data;
+  }
+};
+
 module.exports = {
   validateCreateUser,
   validateLogin,
   auth,
+  initiatePayment,
+  verifyPayment,
 };
