@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 
 const createUser = async (req, res) => {
-    const { fullName, email, password, country } = req.body;
+    const { firstName,lastName, email, password, country } = req.body;
     try {
       const existingUser = await userModel.findOne({
         email: email,
@@ -30,7 +30,7 @@ const createUser = async (req, res) => {
 
       const JWT_SECRET = process.env.JWT_SECRET;
       const token = await jwt.sign(
-        { fullName: user.fullName, email: user.email, _id: user._id },
+        { firstName: user.firstName, lastName: user.lastName,  email: user.email, _id: user._id },
         JWT_SECRET
       );
 
