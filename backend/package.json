@@ -2,10 +2,12 @@
     "name": "fintech-project",
     "version": "1.0.0",
     "description": "",
-    "builds": [{
-        "src": "app.js",
-        "use": "@now/node"
-    }],
+    "builds": [
+        {
+            "src": "app.js",
+            "use": "@now/node"
+        }
+    ],
     "main": "index.js",
     "scripts": {
         "start": "nodemon app.js",
@@ -27,5 +29,8 @@
         "nodemon": "^3.0.1",
         "shortid": "^2.2.16",
         "util": "^0.12.5"
+    },
+    "devDependencies": {
+        "@vercel/node": "^3.0.11"
     }
 }
