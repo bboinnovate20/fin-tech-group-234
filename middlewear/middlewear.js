@@ -7,14 +7,22 @@ const axios = require("axios");
 const validateCreateUser = async (req, res, next) => {
     try {
         const schema = joi.object({
-            first_name: joi.string().trim().required().messages({
-                'string.empty': `"First name" cannot be empty`,
-                'any.required': `"First name" is required`,
+          firstName: joi.string().trim().required().messages({
+                'string.empty': `"firstName" cannot be empty`,
+                'any.required': `"firstName" is required`,
             }),
-            last_name: joi.string().trim().required().messages({
-                'string.empty': `"Last name" cannot be empty`,
-                'any.required': `"Last name" is required`,
+            lastName: joi.string().trim().required().messages({
+                'string.empty': `"lastName" cannot be empty`,
+                'any.required': `"lastName" is required`,
             }),
+            businessName: joi.string().trim().required().messages({
+              'string.empty': `"businessName" cannot be empty`,
+              'any.required': `"businessName" is required`,
+            }),
+            phoneNumber: joi.string().trim().required().messages({
+              'string.empty': `"phoneNumber" cannot be empty`,
+              'any.required': `"phoneNumber" is required`,
+          }),
             email: joi.string().trim().email({
                 minDomainSegments: 2,
                 tlds: { allow: ['com', 'net'] }, 

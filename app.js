@@ -17,7 +17,6 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 app.use("/users", userRoute);
-// app.use("/invoice", invoiceRoute);
 
 connectionToMongodb();
 
